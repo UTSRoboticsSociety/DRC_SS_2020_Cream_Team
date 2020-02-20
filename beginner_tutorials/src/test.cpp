@@ -23,9 +23,9 @@
 	#define DEBUG
 	//#define PRINT_IMG
 	//#define TEST_IMG
-	#define DISPLAY_IMG
+	//#define DISPLAY_IMG
 	#define testturning
-	//#define camangle
+	#define camangle
 
 	#define turnscaling 40
 	#define turnoffset 10
@@ -55,52 +55,54 @@
  
 
 
-	int main(int argc, char **argv)
-	{
-		//setup variable containers
-		std::vector<int> points;
-		std::vector<int> blueMidPoints;
-		std::vector<int> yellowMidPoints;
+int main(int argc, char **argv)
+{
+	//setup variable containers
+	std::vector<int> points;
+	std::vector<int> blueMidPoints;
+	std::vector<int> yellowMidPoints;
 
-		//ROS setup
-		ros::init(argc, argv, "test");
+	//ROS setup
+	ros::init(argc, argv, "test");
 	
-		ros::NodeHandle m;
-		ros::Publisher servo_pub = m.advertise<std_msgs::UInt16>("servo",500);
+	ros::NodeHandle m;
+	ros::Publisher servo_pub = m.advertise<std_msgs::UInt16>("servo",500);
 
-		ros::NodeHandle n;
-		ros::Publisher chatter_pub = n.advertise<std_msgs::String>("chatter",10);
+	ros::NodeHandle n;
+	ros::Publisher chatter_pub = n.advertise<std_msgs::String>("chatter",10);
 
-		ros::NodeHandle s;
-		ros::Publisher speed_pub = s.advertise<std_msgs::UInt16>("motorspeed",500);
-
-
-		ros::Rate loop_rate(10);
+	ros::NodeHandle s;
+	ros::Publisher speed_pub = s.advertise<std_msgs::UInt16>("motorspeed",500);
 
 
-		std_msgs::UInt16 angle;
-		std_msgs::UInt16 speed;
+	ros::Rate loop_rate(60);
 
-		//Image Read
-		cv::Mat image;
+
+	std_msgs::UInt16 angle;
+	std_msgs::UInt16 speed;
+
+	//Image Read
+	cv::Mat image;
 		
 
 	#ifdef return
 		return 1;
 	#endif
-
-	//Loop image, and recipricating servo angle and print angle size
-	while(ros::ok())
-	{
-	//grabs image from camera imports into image
-
-	#ifndef TEST_IMG
+#ifndef TEST_IMG
 		//video camera setup
 		VideoCapture cap(0);
 		//test if cam found
 		if(!cap.open(-1)){
         		return 0;
 		}	
+#endif
+	//Loop image, and recipricating servo angle and print angle size
+	while(ros::ok())
+	{
+	//grabs image from camera imports into image
+
+	#ifndef TEST_IMG
+
 		cap >> image;
 	#endif
 	#ifdef TEST_IMG
@@ -135,9 +137,9 @@
 
 		//Set up referece img
 
-		Mat mask(r, c, CV_8UC3, Scalar(0, 0, 0));
-		r = image.rows;
-		c = image.cols;
+		//Mat mask(r, c, CV_8UC3, Scalar(0, 0, 0));
+		//r = image.rows;
+		//c = image.cols;
 #ifdef DISPLAY_IMG		
 		cv::imshow("window", image);
 		cv::waitKey(1);
@@ -278,7 +280,7 @@ std::cout << "Offsetavg is: "<<offsetavg<<std::endl;
 
 		std_msgs::String msg;
 		std::stringstream tt;
-		int delay = 2;
+		int delay = 1;
 
 		//Setting servo angle and motor speed
 
@@ -295,51 +297,16 @@ std::cout << "Offsetavg is: "<<offsetavg<<std::endl;
 		//ros::Duration(0.5).sleep();
 		
 #endif
-		/*speed.data = 80;
+
+		speed.data = 175;
 		speed_pub.publish(speed);
-		ros::Duration(delay).sleep();
+		//ros::Duration(delay).sleep();
 
 		tt << "Speed: "<<speed.data<<std::endl;
 		msg.data = tt.str();
 		ROS_INFO("%s",msg.data.c_str());
 		chatter_pub.publish(msg);
 
-		speed.data = 90;
-		speed_pub.publish(speed);
-		ros::Duration(delay).sleep();
-
-		tt << "Speed: "<<speed.data<<std::endl;
-		msg.data = tt.str();
-		ROS_INFO("%s",msg.data.c_str());
-		chatter_pub.publish(msg);
-
-		speed.data = 100;
-		speed_pub.publish(speed);
-		ros::Duration(delay).sleep();
-
-		tt << "Speed: "<<speed.data<<std::endl;
-		msg.data = tt.str();
-		ROS_INFO("%s",msg.data.c_str());
-		chatter_pub.publish(msg);
-
-		speed.data = 110;
-		speed_pub.publish(speed);
-		ros::Duration(delay).sleep();
-
-		tt << "Speed: "<<speed.data<<std::endl;
-		msg.data = tt.str();
-		ROS_INFO("%s",msg.data.c_str());
-		chatter_pub.publish(msg);
-
-		speed.data = 120;
-		speed_pub.publish(speed);
-		ros::Duration(delay).sleep();
-
-		tt << "Speed: "<<speed.data<<std::endl;
-		msg.data = tt.str();
-		ROS_INFO("%s",msg.data.c_str());
-		chatter_pub.publish(msg);
-*/
 
 //		ros::shutdown();
 		ros::spinOnce();
