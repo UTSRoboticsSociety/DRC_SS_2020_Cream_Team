@@ -23,7 +23,7 @@
 	#define DEBUG
 	//#define PRINT_IMG
 	//#define TEST_IMG
-	//#define DISPLAY_IMG
+	#define DISPLAY_IMG
 	#define testturning
 	#define camangle
 
@@ -151,13 +151,30 @@ int main(int argc, char **argv)
 		for(int i = 0; i < c; i++)
 		{
 			OutputImage.at<Vec3b>(250,i) = 255;
-OutputImage.at<Vec3b>(310,i) = {255,0,0};
-OutputImage.at<Vec3b>(370,i) = 255;
+			OutputImage.at<Vec3b>(310,i) = 255;
+			OutputImage.at<Vec3b>(370,i) = 255;
 		}
 			
 
 		imshow("Blue Detection", OutputImage);
 		waitKey(10);
+
+		
+		inRange(image,Scalar(y_blower,y_glower,y_rlower),Scalar(y_bupper,y_gupper,y_rupper),OutputImage);
+
+		//adding lines
+		for(int i = 0; i < c; i++)
+		{
+			OutputImage.at<Vec3b>(250,i) = 255;
+			OutputImage.at<Vec3b>(310,i) = 255;
+			OutputImage.at<Vec3b>(370,i) = 255;
+
+		}
+			
+
+		imshow("Yellow Detection", OutputImage);
+		waitKey(9);
+
 
 #endif
 
@@ -179,7 +196,8 @@ OutputImage.at<Vec3b>(370,i) = 255;
 	
 		for(int k = 0; k < 3; k++)
 		{
-			//hit iterator
+
+			//hit iterator blue
 			j = 0;
 			points.clear();
 			int row = (k * 60)+250;
@@ -213,6 +231,41 @@ OutputImage.at<Vec3b>(370,i) = 255;
 				}			
 			}
 
+	/*		//hit iterator yellow
+			j = 0;
+			points.clear();
+			int row = (k * 60)+250;
+			for (i = 1; i <= r; i++)
+			{
+	
+				//will scan across row 100
+				pixelRGB = image.at<Vec3b>(i,row);
+				red = pixelRGB.val[2];
+				green = pixelRGB.val[1];
+				blue = pixelRGB.val[0];
+				#ifdef DEBUG
+					//std::cout << "Red:"<<red<<" Green:"<<green<<" Blue:"<<blue<<" At"<<i<<","<<row<<std::endl;
+				#endif
+	
+				//  tests of pixels are within value range (this tests for one color)
+				if(red < y_rupper && red > y_rlower){
+					if(green < y_gupper && green > y_glower){
+						if(blue < y_bupper && blue > y_blower){
+								
+							//found target color
+							points.push_back(i);
+
+							#ifdef DEBUG
+								//std::cout << "iterator: " <<j << std::endl;
+								//std::cout << "array at it: "<<points.at(j) << endl;
+							#endif			
+							j++;
+						}
+					}
+				}			
+			}
+
+*/
 			//find and record mid point
 			midpoint = points.size() / 2;
 			if(midpoint == 0){
@@ -221,6 +274,11 @@ OutputImage.at<Vec3b>(370,i) = 255;
 
 				#ifdef DEBUG
 					std::cout<<"no blue found"<<std::endl;
+				#endif
+				yellowMidPoints.push_back(midpoint);
+
+				#ifdef DEBUG
+					std::cout<<"no yellow found"<<std::endl;
 				#endif
 			}
 			else if(points.at(midpoint) > c/2){
@@ -231,19 +289,35 @@ OutputImage.at<Vec3b>(370,i) = 255;
 					std::cout<<"   blue found OVERSHOT"<<std::endl;
 				#endif
 			}
+
+			
+			else if(points.at(midpoint) > c/2){
+				midpoint = c;
+				yellowMidPoints.push_back(midpoint);
+
+				#ifdef DEBUG
+					std::cout<<"   yellow found OVERSHOT"<<std::endl;
+				#endif
+			}
 			else{
 				blueMidPoints.push_back(points.at(midpoint));
 				#ifdef DEBUG
 					std::cout<<"   blue found"<<std::endl;
+				#endif
+				yellowMidPoints.push_back(points.at(midpoint));
+				#ifdef DEBUG
+					std::cout<<"   yellow found"<<std::endl;
 				#endif
 			}
 			for(int i = 0; i < blueMidPoints.size(); i++)
 			{
 				std::cout<<"mid point num"<<i<<" is:"<<blueMidPoints.at(i)<<std::endl;
 			}
-	
-			//clear points for next point
-			points.clear();
+
+			for(int i = 0; i < yellowMidPoints.size(); i++)
+			{
+				std::cout<<"mid point num"<<i<<" is:"<<yellowMidPoints.at(i)<<std::endl;
+			}
 	
 		//end line for loop it here
 		}
@@ -253,22 +327,33 @@ OutputImage.at<Vec3b>(370,i) = 255;
 		int sendturn;
 		double midPixel = c/2.0;
 
-		double offsetavg = 0;
+		double offsetavgBlue = 0;
+		double offsetavgYellow = 0;
 		int sum = 0;
+//getting avg for blue
 		for(std::vector<int>::iterator it = blueMidPoints.begin(); it != blueMidPoints.end(); ++it)
 		{
 			sum += *it;
 		}
-		offsetavg = sum / blueMidPoints.size();
-std::cout << "Offsetavg is: "<<offsetavg<<std::endl;
-//double offset = 200 - midPixel;
+		offsetavgBlue = sum / blueMidPoints.size();
+//getting avg for yellow
+		for(std::vector<int>::iterator it = yellowMidPoints.begin(); it != yellowMidPoints.end(); ++it)
+		{
+			sum += *it;
+		}
+		offsetavgYellow = sum / yellowMidPoints.size();
 
-		double ratioOffset = (double) offsetavg / midPixel;
+std::cout << "Offsetavg is: "<<offsetavgBlue<<std::endl;
+
+
+		double ratioOffset = (double) offsetavgBlue / midPixel;
 		std::cout<<"Ratio Offset is: "<<ratioOffset<<std::endl;
 
 		//turning 
 		sendturn = turnscaling * ratioOffset + turnoffset;
-		std::cout<<"desired angle to send:"<<sendturn<<std::endl;
+		std::cout<<"desired blue angle to send:"<<sendturn<<std::endl;
+
+
 
 		
 #endif
