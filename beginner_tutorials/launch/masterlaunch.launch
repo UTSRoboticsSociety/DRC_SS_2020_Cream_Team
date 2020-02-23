@@ -1,0 +1,28 @@
+<launch>
+
+<arg name="namespace" default="droid_main" />
+
+<group ns="$(arg namespace)">
+
+        <arg name="CAMERA"              value="1"       />
+	<arg name="SerialUSB"		value="1"	/>
+	<arg name="getimage"		value="1"	/>
+	<arg name="colourmask"		value="1"	/>
+
+	<group if="$(arg CAMERA)">
+                <include file="$(find usb_cam)/launch/usb_cam-test.launch"/>
+        </group>
+
+	<group if="$(arg SerialUSB)">
+		<include file="$(find beginner_tutorials)/launch/serialusb.launch" />
+	</group>
+
+	<group if="$(arg getimage)">
+		<include file="$(find beginner_tutorials)/launch/getimage.launch"/>
+	</group>
+
+	<group if="$(arg colourmask)">
+		<include file="$(find beginner_tutorials)/launch/colourmask.launch"/>
+	</group>
+</group>
+</launch>
