@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   std_msgs
   cv_bridge
+  image_transport
 )
 
 find_package(OpenCV 3 REQUIRED)
@@ -224,3 +225,12 @@ target_link_libraries(test ${catkin_LIBRARIES})
 target_link_libraries(test ${OpenCV_LIBS})
 add_dependencies(test beginner_tutorials_generate_messages_cpp)
 
+add_executable(getimage src/getimage.cpp)
+target_link_libraries(getimage ${catkin_LIBRARIES}) 
+target_link_libraries(getimage ${OpenCV_LIBS})
+add_dependencies(getimage beginner_tutorials_generate_messages_cpp)
+
+add_executable(colourmask src/colourmask.cpp)
+target_link_libraries(colourmask ${catkin_LIBRARIES}) 
+target_link_libraries(colourmask ${OpenCV_LIBS})
+add_dependencies(colourmask beginner_tutorials_generate_messages_cpp)
