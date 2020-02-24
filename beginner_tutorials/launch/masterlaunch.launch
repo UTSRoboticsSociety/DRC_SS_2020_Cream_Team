@@ -5,9 +5,10 @@
 <group ns="$(arg namespace)">
 
         <arg name="CAMERA"              value="1"       />
-	<arg name="SerialUSB"		value="0"	/>
-	<arg name="getimage"		value="0"	/>
-	<arg name="colourmask"		value="0"	/>
+	<arg name="SerialUSB"		value="1"	/>
+	<arg name="maintest"		value="1"	/>
+	<arg name="colourmask"		value="1"	/>
+	<arg name="imgviewer"		value="1"	/>
 
 	<group if="$(arg CAMERA)">
                 <include file="$(find usb_cam)/launch/usb_cam-test.launch"/>
@@ -17,12 +18,17 @@
 		<include file="$(find beginner_tutorials)/launch/serialusb.launch" />
 	</group>
 
-	<group if="$(arg getimage)">
-		<include file="$(find beginner_tutorials)/launch/getimage.launch"/>
+	<group>
+		<include file="$(find beginner_tutorials)/launch/maintest.launch"/>
 	</group>
 
 	<group if="$(arg colourmask)">
 		<include file="$(find beginner_tutorials)/launch/colourmask.launch"/>
 	</group>
+
+	<group if="$(arg imgviewer)">
+		<include file="$(find beginner_tutorials)/launch/imgviewer.launch"/>
+	</group>
+
 </group>
 </launch>

@@ -1,0 +1,4 @@
+<launch>
+	<node name="maintest" pkg="beginner_tutorials" type="test">
+	</node>
+</launch>

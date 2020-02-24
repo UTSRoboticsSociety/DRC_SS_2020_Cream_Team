@@ -1,0 +1,4 @@
+<launch>
+	<node name="imgviewer" pkg="beginner_tutorials" type="imgviewer">
+	</node>
+</launch>
