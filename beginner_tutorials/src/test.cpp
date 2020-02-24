@@ -211,6 +211,10 @@ int main(int argc, char **argv)
 
 #endif
 
+#ifdef USE_PERSPECTIVE
+	image = dst;
+#endif
+
 		#ifdef DEFINE
 		std::cout << "mask: \n" << mask << std::endl;
 		std::cout << "rows: " << r << std::endl;
