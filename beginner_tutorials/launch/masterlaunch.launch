@@ -18,7 +18,7 @@
 		<include file="$(find beginner_tutorials)/launch/serialusb.launch" />
 	</group>
 
-	<group>
+	<group if="$(arg maintest)">
 		<include file="$(find beginner_tutorials)/launch/maintest.launch"/>
 	</group>
 

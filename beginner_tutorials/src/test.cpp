@@ -1,4 +1,4 @@
-	#include "ros/ros.h"
+#include "ros/ros.h"
 	#include "std_msgs/UInt16.h"
 
 	#include "std_msgs/String.h"
@@ -11,9 +11,6 @@
 	#include <opencv2/imgproc/imgproc.hpp>
 
 	#include <opencv2/opencv.hpp>
-	#include <image_transport/image_transport.h>
-	#include <sensor_msgs/image_encodings.h>
-
 
 #include <iostream>
 #include <array>
@@ -25,8 +22,8 @@
 
 	#define DEBUG
 	//#define PRINT_IMG
-	#define TEST_IMG
-	//#define DISPLAY_IMG
+	//#define TEST_IMG
+	#define DISPLAY_IMG
 	#define testturning
 	#define camangle
 
@@ -54,8 +51,18 @@
 #define y_gupper 245
 #define y_rupper 248
 
+//vertices for perspective transformation
+#define topLeft 45,255
+#define topRight 595,255
+#define bottomLeft 0,275
+#define bottomRight 640,275
 
- 
+void transform(Point2f*src_vertices, Point2f*dst_vertices, Mat& src, Mat &dst)
+{
+	Mat M = getPerspectiveTransform(src_vertices, dst_vertices);
+	warpPerspective(src, dst, M, dst.size(), INTER_LINEAR, BORDER_CONSTANT);
+}
+
 
 
 int main(int argc, char **argv)
@@ -64,6 +71,26 @@ int main(int argc, char **argv)
 	std::vector<int> points;
 	std::vector<int> blueMidPoints;
 	std::vector<int> yellowMidPoints;
+
+	//setting up image transform objects
+	
+	//select points from source image
+	Point2f src_vertices[4];
+	src_vertices[0] = Point(topLeft);
+	src_vertices[1] = Point(topRight);
+	src_vertices[2] = Point(bottomLeft);
+	src_vertices[3] = Point(bottomRight);
+
+	//map points into a 640,480 window
+	Point2f dst_vertices[4];
+	dst_vertices[0] = Point(0,0);
+	dst_vertices[1] = Point(640,0);
+	dst_vertices[2] = Point(0,480);
+	dst_vertices[3] = Point(640,480);
+		
+	Mat M = getPerspectiveTransform(src_vertices, dst_vertices);
+	Mat dst(480, 640, CV_8UC3);
+	
 
 	//ROS setup
 	ros::init(argc, argv, "test");
@@ -154,14 +181,38 @@ int main(int argc, char **argv)
 		for(int i = 0; i < c; i++)
 		{
 			OutputImage.at<Vec3b>(250,i) = 255;
-OutputImage.at<Vec3b>(310,i) = {255,0,0};
-OutputImage.at<Vec3b>(370,i) = 255;
+			OutputImage.at<Vec3b>(310,i) = 255;
+			OutputImage.at<Vec3b>(370,i) = 255;
 		}
 			
 
 		imshow("Blue Detection", OutputImage);
 		waitKey(10);
 
+		
+		inRange(image,Scalar(y_blower,y_glower,y_rlower),Scalar(y_bupper,y_gupper,y_rupper),OutputImage);
+
+		//adding lines
+		for(int i = 0; i < c; i++)
+		{
+			OutputImage.at<Vec3b>(250,i) = 255;
+			OutputImage.at<Vec3b>(310,i) = 255;
+			OutputImage.at<Vec3b>(370,i) = 255;
+
+		}
+			
+
+		imshow("Yellow Detection", OutputImage);
+		waitKey(9);
+		
+		//Perspective Transform		
+		warpPerspective(image, dst, M, dst.size(), INTER_LINEAR, BORDER_CONSTANT);
+		imshow("dst", dst);
+
+#endif
+
+#ifdef USE_PERSPECTIVE
+	image = dst;
 #endif
 
 		#ifdef DEFINE
@@ -182,14 +233,9 @@ OutputImage.at<Vec3b>(370,i) = 255;
 	
 		for(int k = 0; k < 3; k++)
 		{
-<<<<<<< Updated upstream
-			//hit iterator
-			j = 0;
-=======
 /**************************************************YELLOW********************************************************************/
 			//hit iterator yellow
 
->>>>>>> Stashed changes
 			points.clear();
 			int row = (k * 60)+250;
 			for (int i = 1; i <= r; i++)
@@ -217,8 +263,6 @@ OutputImage.at<Vec3b>(370,i) = 255;
 				}			
 			}
 
-<<<<<<< Updated upstream
-=======
 
 			//find and record mid point
 			midpoint = points.size() / 2;
@@ -274,7 +318,6 @@ OutputImage.at<Vec3b>(370,i) = 255;
 				}			
 			}
 
->>>>>>> Stashed changes
 			//find and record mid point
 			midpoint = points.size() / 2;
 			if(midpoint == 0){
@@ -303,17 +346,11 @@ OutputImage.at<Vec3b>(370,i) = 255;
 			{
 				std::cout<<"b mid point num"<<i<<" is:"<<blueMidPoints.at(i)<<std::endl;
 			}
-<<<<<<< Updated upstream
-	
-			//clear points for next point
-			points.clear();
-=======
 
 			for(int i = 0; i < yellowMidPoints.size(); i++)
 			{
 				std::cout<<"y mid point num"<<i<<" is:"<<yellowMidPoints.at(i)<<std::endl;
 			}
->>>>>>> Stashed changes
 	
 		//end line for loop it here
 		}
@@ -323,17 +360,14 @@ OutputImage.at<Vec3b>(370,i) = 255;
 		int sendturn;
 		double midPixel = c/2.0;
 
-		double offsetavg = 0;
+		double offsetavgBlue = 0;
+		double offsetavgYellow = 0;
 		int sum = 0;
+//getting avg for blue
 		for(std::vector<int>::iterator it = blueMidPoints.begin(); it != blueMidPoints.end(); ++it)
 		{
 			sum += *it;
 		}
-<<<<<<< Updated upstream
-		offsetavg = sum / blueMidPoints.size();
-std::cout << "Offsetavg is: "<<offsetavg<<std::endl;
-//double offset = 200 - midPixel;
-=======
 		offsetavgBlue = sum / blueMidPoints.size();
 //getting avg for yellow
 		for(std::vector<int>::iterator it = yellowMidPoints.begin(); it != yellowMidPoints.end(); ++it)
@@ -344,14 +378,15 @@ std::cout << "Offsetavg is: "<<offsetavg<<std::endl;
 
 std::cout << "Offsetavg is: "<<offsetavgBlue<<std::endl;
 
->>>>>>> Stashed changes
 
-		double ratioOffset = (double) offsetavg / midPixel;
+		double ratioOffset = (double) offsetavgBlue / midPixel;
 		std::cout<<"Ratio Offset is: "<<ratioOffset<<std::endl;
 
 		//turning 
 		sendturn = turnscaling * ratioOffset + turnoffset;
-		std::cout<<"desired angle to send:"<<sendturn<<std::endl;
+		std::cout<<"desired blue angle to send:"<<sendturn<<std::endl;
+
+
 
 		
 #endif
