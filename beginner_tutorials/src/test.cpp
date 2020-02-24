@@ -15,7 +15,6 @@
 	#include <sensor_msgs/image_encodings.h>
 
 
-
 #include <iostream>
 #include <array>
 #include <math.h>
@@ -26,7 +25,7 @@
 
 	#define DEBUG
 	//#define PRINT_IMG
-	//#define TEST_IMG
+	#define TEST_IMG
 	//#define DISPLAY_IMG
 	#define testturning
 	#define camangle
