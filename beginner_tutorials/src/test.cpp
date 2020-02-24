@@ -226,57 +226,23 @@ int main(int argc, char **argv)
 		Vec3b pixelRGB;
 		double RBG[3];
 		double red, green, blue;
-		int i, j;		
+				
 		
 		//setup variable for mid point
 		int midpoint;
 	
 		for(int k = 0; k < 3; k++)
 		{
+/**************************************************YELLOW********************************************************************/
+			//hit iterator yellow
 
-			//hit iterator blue
-			j = 0;
 			points.clear();
 			int row = (k * 60)+250;
-			for (i = 1; i <= r; i++)
+			for (int i = 1; i <= r; i++)
 			{
 	
 				//will scan across row 100
-				pixelRGB = image.at<Vec3b>(i,row);
-				red = pixelRGB.val[2];
-				green = pixelRGB.val[1];
-				blue = pixelRGB.val[0];
-				#ifdef DEBUG
-					//std::cout << "Red:"<<red<<" Green:"<<green<<" Blue:"<<blue<<" At"<<i<<","<<row<<std::endl;
-				#endif
-	
-				//  tests of pixels are within value range (this tests for one color)
-				if(red < b_rupper && red > b_rlower){
-					if(green < b_gupper && green > b_glower){
-						if(blue < b_bupper && blue > b_blower){
-								
-							//found target color
-							points.push_back(i);
-
-							#ifdef DEBUG
-								//std::cout << "iterator: " <<j << std::endl;
-								//std::cout << "array at it: "<<points.at(j) << endl;
-							#endif			
-							j++;
-						}
-					}
-				}			
-			}
-
-	/*		//hit iterator yellow
-			j = 0;
-			points.clear();
-			int row = (k * 60)+250;
-			for (i = 1; i <= r; i++)
-			{
-	
-				//will scan across row 100
-				pixelRGB = image.at<Vec3b>(i,row);
+				pixelRGB = image.at<Vec3b>(row,i);
 				red = pixelRGB.val[2];
 				green = pixelRGB.val[1];
 				blue = pixelRGB.val[0];
@@ -290,44 +256,24 @@ int main(int argc, char **argv)
 						if(blue < y_bupper && blue > y_blower){
 								
 							//found target color
-							points.push_back(i);
-
-							#ifdef DEBUG
-								//std::cout << "iterator: " <<j << std::endl;
-								//std::cout << "array at it: "<<points.at(j) << endl;
-							#endif			
-							j++;
+							points.push_back(i);		
+							
 						}
 					}
 				}			
 			}
 
-*/
+
 			//find and record mid point
 			midpoint = points.size() / 2;
 			if(midpoint == 0){
 				midpoint = c/2.0;
-				blueMidPoints.push_back(midpoint);
-
-				#ifdef DEBUG
-					std::cout<<"no blue found"<<std::endl;
-				#endif
 				yellowMidPoints.push_back(midpoint);
 
 				#ifdef DEBUG
 					std::cout<<"no yellow found"<<std::endl;
 				#endif
 			}
-			else if(points.at(midpoint) > c/2){
-				midpoint = c;
-				blueMidPoints.push_back(midpoint);
-
-				#ifdef DEBUG
-					std::cout<<"   blue found OVERSHOT"<<std::endl;
-				#endif
-			}
-
-			
 			else if(points.at(midpoint) > c/2){
 				midpoint = c;
 				yellowMidPoints.push_back(midpoint);
@@ -337,23 +283,73 @@ int main(int argc, char **argv)
 				#endif
 			}
 			else{
-				blueMidPoints.push_back(points.at(midpoint));
-				#ifdef DEBUG
-					std::cout<<"   blue found"<<std::endl;
-				#endif
 				yellowMidPoints.push_back(points.at(midpoint));
 				#ifdef DEBUG
 					std::cout<<"   yellow found"<<std::endl;
 				#endif
 			}
+/*****************************************************************BLUE***************************************************************/
+			//hit iterator blue
+
+			points.clear();
+			//int row = (k * 60)+250;
+			for (int i = 1; i <= r; i++)
+			{
+	
+				//will scan across row 100
+				pixelRGB = image.at<Vec3b>(row,i);
+				red = pixelRGB.val[2];
+				green = pixelRGB.val[1];
+				blue = pixelRGB.val[0];
+				#ifdef DEBUG
+					//std::cout << "Red:"<<red<<" Green:"<<green<<" Blue:"<<blue<<" At"<<i<<","<<row<<std::endl;
+				#endif
+	
+				//  tests of pixels are within value range (this tests for one color)
+				if(red < b_rupper && red > b_rlower){
+					if(green < b_gupper && green > b_glower){
+						if(blue < b_bupper && blue > b_blower){
+								
+							//found target color
+							points.push_back(i);		
+							
+						}
+					}
+				}			
+			}
+
+			//find and record mid point
+			midpoint = points.size() / 2;
+			if(midpoint == 0){
+				midpoint = c/2.0;
+				blueMidPoints.push_back(midpoint);
+
+				#ifdef DEBUG
+					std::cout<<"no blue found"<<std::endl;
+				#endif
+			}
+			else if(points.at(midpoint) < c/2){
+				midpoint = c;
+				blueMidPoints.push_back(midpoint);
+
+				#ifdef DEBUG
+					std::cout<<"   blue found OVERSHOT"<<std::endl;
+				#endif
+			}
+			else{
+				blueMidPoints.push_back(points.at(midpoint));
+				#ifdef DEBUG
+					std::cout<<"   blue found"<<std::endl;
+				#endif
+			}
 			for(int i = 0; i < blueMidPoints.size(); i++)
 			{
-				std::cout<<"mid point num"<<i<<" is:"<<blueMidPoints.at(i)<<std::endl;
+				std::cout<<"b mid point num"<<i<<" is:"<<blueMidPoints.at(i)<<std::endl;
 			}
 
 			for(int i = 0; i < yellowMidPoints.size(); i++)
 			{
-				std::cout<<"mid point num"<<i<<" is:"<<yellowMidPoints.at(i)<<std::endl;
+				std::cout<<"y mid point num"<<i<<" is:"<<yellowMidPoints.at(i)<<std::endl;
 			}
 	
 		//end line for loop it here
@@ -378,7 +374,7 @@ int main(int argc, char **argv)
 		{
 			sum += *it;
 		}
-		offsetavgYellow = sum / yellowMidPoints.size();
+		//offsetavgYellow = sum / yellowMidPoints.size();
 
 std::cout << "Offsetavg is: "<<offsetavgBlue<<std::endl;
 
