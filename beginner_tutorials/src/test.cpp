@@ -175,22 +175,85 @@ OutputImage.at<Vec3b>(370,i) = 255;
 		Vec3b pixelRGB;
 		double RBG[3];
 		double red, green, blue;
-		int i, j;		
+				
 		
 		//setup variable for mid point
 		int midpoint;
 	
 		for(int k = 0; k < 3; k++)
 		{
+<<<<<<< Updated upstream
 			//hit iterator
 			j = 0;
+=======
+/**************************************************YELLOW********************************************************************/
+			//hit iterator yellow
+
+>>>>>>> Stashed changes
 			points.clear();
 			int row = (k * 60)+250;
-			for (i = 1; i <= r; i++)
+			for (int i = 1; i <= r; i++)
 			{
 	
 				//will scan across row 100
-				pixelRGB = image.at<Vec3b>(i,row);
+				pixelRGB = image.at<Vec3b>(row,i);
+				red = pixelRGB.val[2];
+				green = pixelRGB.val[1];
+				blue = pixelRGB.val[0];
+				#ifdef DEBUG
+					//std::cout << "Red:"<<red<<" Green:"<<green<<" Blue:"<<blue<<" At"<<i<<","<<row<<std::endl;
+				#endif
+	
+				//  tests of pixels are within value range (this tests for one color)
+				if(red < y_rupper && red > y_rlower){
+					if(green < y_gupper && green > y_glower){
+						if(blue < y_bupper && blue > y_blower){
+								
+							//found target color
+							points.push_back(i);		
+							
+						}
+					}
+				}			
+			}
+
+<<<<<<< Updated upstream
+=======
+
+			//find and record mid point
+			midpoint = points.size() / 2;
+			if(midpoint == 0){
+				midpoint = c/2.0;
+				yellowMidPoints.push_back(midpoint);
+
+				#ifdef DEBUG
+					std::cout<<"no yellow found"<<std::endl;
+				#endif
+			}
+			else if(points.at(midpoint) > c/2){
+				midpoint = c;
+				yellowMidPoints.push_back(midpoint);
+
+				#ifdef DEBUG
+					std::cout<<"   yellow found OVERSHOT"<<std::endl;
+				#endif
+			}
+			else{
+				yellowMidPoints.push_back(points.at(midpoint));
+				#ifdef DEBUG
+					std::cout<<"   yellow found"<<std::endl;
+				#endif
+			}
+/*****************************************************************BLUE***************************************************************/
+			//hit iterator blue
+
+			points.clear();
+			//int row = (k * 60)+250;
+			for (int i = 1; i <= r; i++)
+			{
+	
+				//will scan across row 100
+				pixelRGB = image.at<Vec3b>(row,i);
 				red = pixelRGB.val[2];
 				green = pixelRGB.val[1];
 				blue = pixelRGB.val[0];
@@ -204,18 +267,14 @@ OutputImage.at<Vec3b>(370,i) = 255;
 						if(blue < b_bupper && blue > b_blower){
 								
 							//found target color
-							points.push_back(i);
-
-							#ifdef DEBUG
-								//std::cout << "iterator: " <<j << std::endl;
-								//std::cout << "array at it: "<<points.at(j) << endl;
-							#endif			
-							j++;
+							points.push_back(i);		
+							
 						}
 					}
 				}			
 			}
 
+>>>>>>> Stashed changes
 			//find and record mid point
 			midpoint = points.size() / 2;
 			if(midpoint == 0){
@@ -226,7 +285,7 @@ OutputImage.at<Vec3b>(370,i) = 255;
 					std::cout<<"no blue found"<<std::endl;
 				#endif
 			}
-			else if(points.at(midpoint) > c/2){
+			else if(points.at(midpoint) < c/2){
 				midpoint = c;
 				blueMidPoints.push_back(midpoint);
 
@@ -242,11 +301,19 @@ OutputImage.at<Vec3b>(370,i) = 255;
 			}
 			for(int i = 0; i < blueMidPoints.size(); i++)
 			{
-				std::cout<<"mid point num"<<i<<" is:"<<blueMidPoints.at(i)<<std::endl;
+				std::cout<<"b mid point num"<<i<<" is:"<<blueMidPoints.at(i)<<std::endl;
 			}
+<<<<<<< Updated upstream
 	
 			//clear points for next point
 			points.clear();
+=======
+
+			for(int i = 0; i < yellowMidPoints.size(); i++)
+			{
+				std::cout<<"y mid point num"<<i<<" is:"<<yellowMidPoints.at(i)<<std::endl;
+			}
+>>>>>>> Stashed changes
 	
 		//end line for loop it here
 		}
@@ -262,9 +329,22 @@ OutputImage.at<Vec3b>(370,i) = 255;
 		{
 			sum += *it;
 		}
+<<<<<<< Updated upstream
 		offsetavg = sum / blueMidPoints.size();
 std::cout << "Offsetavg is: "<<offsetavg<<std::endl;
 //double offset = 200 - midPixel;
+=======
+		offsetavgBlue = sum / blueMidPoints.size();
+//getting avg for yellow
+		for(std::vector<int>::iterator it = yellowMidPoints.begin(); it != yellowMidPoints.end(); ++it)
+		{
+			sum += *it;
+		}
+		//offsetavgYellow = sum / yellowMidPoints.size();
+
+std::cout << "Offsetavg is: "<<offsetavgBlue<<std::endl;
+
+>>>>>>> Stashed changes
 
 		double ratioOffset = (double) offsetavg / midPixel;
 		std::cout<<"Ratio Offset is: "<<ratioOffset<<std::endl;
