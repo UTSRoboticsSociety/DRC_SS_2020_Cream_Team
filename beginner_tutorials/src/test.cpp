@@ -51,8 +51,18 @@
 #define y_gupper 245
 #define y_rupper 248
 
+//vertices for perspective transformation
+#define topLeft 45,255
+#define topRight 595,255
+#define bottomLeft 0,275
+#define bottomRight 640,275
 
- 
+void transform(Point2f*src_vertices, Point2f*dst_vertices, Mat& src, Mat &dst)
+{
+	Mat M = getPerspectiveTransform(src_vertices, dst_vertices);
+	warpPerspective(src, dst, M, dst.size(), INTER_LINEAR, BORDER_CONSTANT);
+}
+
 
 
 int main(int argc, char **argv)
@@ -61,6 +71,26 @@ int main(int argc, char **argv)
 	std::vector<int> points;
 	std::vector<int> blueMidPoints;
 	std::vector<int> yellowMidPoints;
+
+	//setting up image transform objects
+	
+	//select points from source image
+	Point2f src_vertices[4];
+	src_vertices[0] = Point(topLeft);
+	src_vertices[1] = Point(topRight);
+	src_vertices[2] = Point(bottomLeft);
+	src_vertices[3] = Point(bottomRight);
+
+	//map points into a 640,480 window
+	Point2f dst_vertices[4];
+	dst_vertices[0] = Point(0,0);
+	dst_vertices[1] = Point(640,0);
+	dst_vertices[2] = Point(0,480);
+	dst_vertices[3] = Point(640,480);
+		
+	Mat M = getPerspectiveTransform(src_vertices, dst_vertices);
+	Mat dst(480, 640, CV_8UC3);
+	
 
 	//ROS setup
 	ros::init(argc, argv, "test");
@@ -174,7 +204,10 @@ int main(int argc, char **argv)
 
 		imshow("Yellow Detection", OutputImage);
 		waitKey(9);
-
+		
+		//Perspective Transform		
+		warpPerspective(image, dst, M, dst.size(), INTER_LINEAR, BORDER_CONSTANT);
+		imshow("dst", dst);
 
 #endif
 
