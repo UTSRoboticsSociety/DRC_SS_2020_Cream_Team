@@ -29,6 +29,7 @@
 
 	#define turnscaling 40
 	#define turnoffset 10
+	#define TURN_MAGNITUDE 30
 	
 
 //Upper and Lower values For BGR: Blue detection
@@ -175,36 +176,31 @@ int main(int argc, char **argv)
 		cv::waitKey(1);
 		
 		Mat OutputImage;
-		inRange(image,Scalar(b_blower,b_glower,b_rlower),Scalar(b_bupper,b_gupper,b_rupper),OutputImage);
+		Mat OutputImageBlue;
+		Mat OutputImageYellow;
+		inRange(image,Scalar(b_blower,b_glower,b_rlower),Scalar(b_bupper,b_gupper,b_rupper),OutputImageBlue);
 
-		//adding lines
-		for(int i = 0; i < c; i++)
-		{
-			OutputImage.at<Vec3b>(250,i) = 255;
-			OutputImage.at<Vec3b>(310,i) = 255;
-			OutputImage.at<Vec3b>(370,i) = 255;
-		}
 			
 
-		imshow("Blue Detection", OutputImage);
-		waitKey(10);
+		//imshow("Blue Detection", OutputImage);
+		//waitKey(10);
 
 		
-		inRange(image,Scalar(y_blower,y_glower,y_rlower),Scalar(y_bupper,y_gupper,y_rupper),OutputImage);
+		inRange(image,Scalar(y_blower,y_glower,y_rlower),Scalar(y_bupper,y_gupper,y_rupper),OutputImageYellow);
 
+
+		//imshow("Yellow Detection", OutputImage);
+		//waitKey(9);
+		OutputImage = OutputImageBlue | OutputImageYellow;
 		//adding lines
 		for(int i = 0; i < c; i++)
 		{
 			OutputImage.at<Vec3b>(250,i) = 255;
 			OutputImage.at<Vec3b>(310,i) = 255;
 			OutputImage.at<Vec3b>(370,i) = 255;
-
 		}
-			
-
 		imshow("Yellow Detection", OutputImage);
 		waitKey(9);
-		
 		//Perspective Transform		
 		warpPerspective(image, dst, M, dst.size(), INTER_LINEAR, BORDER_CONSTANT);
 		imshow("dst", dst);
@@ -267,7 +263,7 @@ int main(int argc, char **argv)
 			//find and record mid point
 			midpoint = points.size() / 2;
 			if(midpoint == 0){
-				midpoint = c/2.0;
+				midpoint = 0;
 				yellowMidPoints.push_back(midpoint);
 
 				#ifdef DEBUG
@@ -275,7 +271,7 @@ int main(int argc, char **argv)
 				#endif
 			}
 			else if(points.at(midpoint) > c/2){
-				midpoint = c;
+				midpoint = 0;
 				yellowMidPoints.push_back(midpoint);
 
 				#ifdef DEBUG
@@ -288,6 +284,7 @@ int main(int argc, char **argv)
 					std::cout<<"   yellow found"<<std::endl;
 				#endif
 			}
+
 /*****************************************************************BLUE***************************************************************/
 			//hit iterator blue
 
@@ -321,7 +318,7 @@ int main(int argc, char **argv)
 			//find and record mid point
 			midpoint = points.size() / 2;
 			if(midpoint == 0){
-				midpoint = c/2.0;
+				midpoint = c;
 				blueMidPoints.push_back(midpoint);
 
 				#ifdef DEBUG
@@ -374,21 +371,26 @@ int main(int argc, char **argv)
 		{
 			sum += *it;
 		}
-		//offsetavgYellow = sum / yellowMidPoints.size();
+		offsetavgYellow = sum / yellowMidPoints.size();
 
 std::cout << "Offsetavg is: "<<offsetavgBlue<<std::endl;
 
 
+//old turning
+/*		
 		double ratioOffset = (double) offsetavgBlue / midPixel;
 		std::cout<<"Ratio Offset is: "<<ratioOffset<<std::endl;
-
 		//turning 
 		sendturn = turnscaling * ratioOffset + turnoffset;
 		std::cout<<"desired blue angle to send:"<<sendturn<<std::endl;
-
-
-
-		
+*/
+		int combineAvg = ( offsetavgBlue + offsetavgYellow ) / 2;
+		int change = combineAvg - midPixel;
+		//servo is 15 - 75
+		//servo 45 is forward
+		double ratio = (double) change / midPixel;
+		sendturn = 45 + ( ratio * TURN_MAGNITUDE );
+	
 #endif
 
 		//done processing clear midpoints
