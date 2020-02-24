@@ -212,25 +212,8 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
-add_executable(talker src/talker.cpp)
-target_link_libraries(talker ${catkin_LIBRARIES})
-add_dependencies(talker beginner_tutorials_generate_messages_cpp)
-
-add_executable(listener src/listener.cpp)
-target_link_libraries(listener ${catkin_LIBRARIES})
-add_dependencies(listener beginner_tutorials_generate_messages_cpp)
-
 add_executable(test src/test.cpp)
 target_link_libraries(test ${catkin_LIBRARIES}) 
 target_link_libraries(test ${OpenCV_LIBS})
 add_dependencies(test beginner_tutorials_generate_messages_cpp)
 
-add_executable(getimage src/getimage.cpp)
-target_link_libraries(getimage ${catkin_LIBRARIES}) 
-target_link_libraries(getimage ${OpenCV_LIBS})
-add_dependencies(getimage beginner_tutorials_generate_messages_cpp)
-
-add_executable(colourmask src/colourmask.cpp)
-target_link_libraries(colourmask ${catkin_LIBRARIES}) 
-target_link_libraries(colourmask ${OpenCV_LIBS})
-add_dependencies(colourmask beginner_tutorials_generate_messages_cpp)
