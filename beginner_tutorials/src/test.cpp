@@ -96,16 +96,13 @@ int main(int argc, char **argv)
 	//ROS setup
 	ros::init(argc, argv, "test");
 	
-	ros::NodeHandle m;
-	ros::Publisher servo_pub = m.advertise<std_msgs::UInt16>("servo",500);
+	ros::NodeHandle nh;
 
-	ros::NodeHandle n;
-	ros::Publisher chatter_pub = n.advertise<std_msgs::String>("chatter",10);
+	ros::Publisher servo_pub = nh.advertise<std_msgs::UInt16>("servo",500);
+	ros::Publisher chatter_pub = nh.advertise<std_msgs::String>("chatter",10);
+	ros::Publisher speed_pub = nh.advertise<std_msgs::UInt16>("motorspeed",500);
 
-	ros::NodeHandle s;
-	ros::Publisher speed_pub = s.advertise<std_msgs::UInt16>("motorspeed",500);
-
-
+	
 	ros::Rate loop_rate(60);
 
 
