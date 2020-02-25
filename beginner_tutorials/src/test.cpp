@@ -38,9 +38,9 @@
 #define b_glower 54
 #define b_rlower 14
 
-#define b_bupper 183
-#define b_gupper 134
-#define b_rupper 94
+#define b_bupper 193
+#define b_gupper 144
+#define b_rupper 104
 
 //Upper and Lower values For BGR: Yellow detection
  
@@ -48,9 +48,9 @@
 #define y_glower 165
 #define y_rlower 168
 
-#define y_bupper 214
-#define y_gupper 245
-#define y_rupper 248
+#define y_bupper 194
+#define y_gupper 225
+#define y_rupper 228
 
 //vertices for perspective transformation
 #define topLeft 45,255
@@ -419,7 +419,7 @@ std::cout << "Offsetavg is: "<<offsetavgBlue<<std::endl;
 		
 #endif
 
-		speed.data = 175;
+		speed.data = 200;
 		speed_pub.publish(speed);
 		//ros::Duration(delay).sleep();
 
