@@ -7,9 +7,11 @@
         <arg name="CAMERA"              value="1"       />
 	<arg name="SerialUSB"		value="1"	/>
 	<arg name="maintest"		value="1"	/>
+<!--
 #	<arg name="colourmask"		value="1"	/>
 #	<arg name="imgviewer"		value="1"	/>
-# colourmask and imgviewer are left for future use. 
+#	colourmask and imgviewer are left for future use. 
+-->
 	<group if="$(arg CAMERA)">
                 <include file="$(find usb_cam)/launch/usb_cam-test.launch"/>
         </group>
@@ -21,7 +23,7 @@
 	<group if="$(arg maintest)">
 		<include file="$(find beginner_tutorials)/launch/maintest.launch"/>
 	</group>
-
+<!--
 #	<group if="$(arg colourmask)">
 #		<include file="$(find beginner_tutorials)/launch/colourmask.launch"/>
 #	</group>
@@ -29,6 +31,6 @@
 #	<group if="$(arg imgviewer)">
 #		<include file="$(find beginner_tutorials)/launch/imgviewer.launch"/>
 #	</group>
-
+-->
 </group>
 </launch>

@@ -1,6 +1,7 @@
-#include "ros/ros.h"
+	#include "ros/ros.h"
 	#include "std_msgs/UInt16.h"
-
+	#include <image_transport/image_transport.h>
+	#include <cv_bridge/cv_bridge.h>
 	#include "std_msgs/String.h"
 	#include <sstream>
 
@@ -102,6 +103,10 @@ int main(int argc, char **argv)
 	ros::Publisher chatter_pub = nh.advertise<std_msgs::String>("chatter",10);
 	ros::Publisher speed_pub = nh.advertise<std_msgs::UInt16>("motorspeed",500);
 
+	image_transport::ImageTransport it(nh);
+	image_transport::Publisher clear_pub = it.advertise("clear_img",1);
+	image_transport::Publisher mask_pub = it.advertise("mask_img",1);
+
 	
 	ros::Rate loop_rate(60);
 
@@ -169,13 +174,20 @@ int main(int argc, char **argv)
 		//r = image.rows;
 		//c = image.cols;
 #ifdef DISPLAY_IMG		
-		cv::imshow("window", image);
+		cv::("window", image);
 		cv::waitKey(1);
 		
 		Mat OutputImage;
 		Mat OutputImageBlue;
 		Mat OutputImageYellow;
 		inRange(image,Scalar(b_blower,b_glower,b_rlower),Scalar(b_bupper,b_gupper,b_rupper),OutputImageBlue);
+
+//-----publish image to ROS------
+
+	sensor_msgs::ImagePtr imgg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toImageMsg();
+	clear_pub.publish(imgg);
+
+//-------------------------------
 
 			
 
