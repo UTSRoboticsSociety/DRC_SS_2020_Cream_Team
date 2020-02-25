@@ -174,7 +174,7 @@ int main(int argc, char **argv)
 		//r = image.rows;
 		//c = image.cols;
 #ifdef DISPLAY_IMG		
-		cv::("window", image);
+		cv::imshow("window", image);
 		cv::waitKey(1);
 		
 		Mat OutputImage;
