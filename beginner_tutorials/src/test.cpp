@@ -29,7 +29,7 @@
 
 	#define turnscaling 40
 	#define turnoffset 10
-	#define TURN_MAGNITUDE 30
+	#define TURN_MAGNITUDE 45
 	
 
 //Upper and Lower values For BGR: Blue detection
@@ -271,7 +271,7 @@ int main(int argc, char **argv)
 				#endif
 			}
 			else if(points.at(midpoint) > c/2){
-				midpoint = 0;
+				midpoint = c;
 				yellowMidPoints.push_back(midpoint);
 
 				#ifdef DEBUG
@@ -326,7 +326,7 @@ int main(int argc, char **argv)
 				#endif
 			}
 			else if(points.at(midpoint) < c/2){
-				midpoint = c;
+				midpoint = 0;
 				blueMidPoints.push_back(midpoint);
 
 				#ifdef DEBUG
@@ -390,7 +390,7 @@ std::cout << "Offsetavg is: "<<offsetavgBlue<<std::endl;
 		//servo is 15 - 75
 		//servo 45 is forward
 		double ratio = (double) change / midPixel;
-		sendturn = 45 + ( ratio * TURN_MAGNITUDE );
+		sendturn = 45 + ( (1 - ratio) * TURN_MAGNITUDE );
 	
 #endif
 
