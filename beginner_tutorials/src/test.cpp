@@ -1,15 +1,15 @@
 	#include "ros/ros.h"
 	#include "std_msgs/UInt16.h"
-
+	#include <image_transport/image_transport.h>
 	#include "std_msgs/String.h"
 	#include <sstream>
-
+	#include <cv_bridge/cv_bridge.h>
 	#include <opencv2/highgui.hpp>
 	#include <iostream>
 	#include <opencv2/core/core.hpp>
 	#include <opencv/cv.hpp>
 	#include <opencv2/imgproc/imgproc.hpp>
-
+	#include <sensor_msgs/image_encodings.h>
 	#include <opencv2/opencv.hpp>
 
 #include <iostream>
@@ -65,8 +65,6 @@ void transform(Point2f*src_vertices, Point2f*dst_vertices, Mat& src, Mat &dst)
 	warpPerspective(src, dst, M, dst.size(), INTER_LINEAR, BORDER_CONSTANT);
 }
 
-
-
 int main(int argc, char **argv)
 {
 	//setup variable containers
@@ -96,23 +94,27 @@ int main(int argc, char **argv)
 
 	//ROS setup
 	ros::init(argc, argv, "test");
+	ros::NodeHandle nh;
 	
-	ros::NodeHandle m;
-	ros::Publisher servo_pub = m.advertise<std_msgs::UInt16>("servo",500);
+	ros::Publisher servo_pub = nh.advertise<std_msgs::UInt16>("servo",500);
 
-	ros::NodeHandle n;
-	ros::Publisher chatter_pub = n.advertise<std_msgs::String>("chatter",10);
+	ros::Publisher chatter_pub = nh.advertise<std_msgs::String>("chatter",10);
 
-	ros::NodeHandle s;
-	ros::Publisher speed_pub = s.advertise<std_msgs::UInt16>("motorspeed",500);
+	ros::Publisher speed_pub = nh.advertise<std_msgs::UInt16>("motorspeed",500);
 
+	image_transport::ImageTransport it(nh);
+	
+	image_transport::Publisher clear_pub = it.advertise("clear_img",1);
+	image_transport::Publisher mask_pub = it.advertise("mask_img",1);
 
 	ros::Rate loop_rate(60);
 
 
 	std_msgs::UInt16 angle;
 	std_msgs::UInt16 speed;
-
+	
+	std_msgs::String msg;
+		std::stringstream tt;
 	//Image Read
 	cv::Mat image;
 		
@@ -205,6 +207,23 @@ int main(int argc, char **argv)
 		//Perspective Transform		
 		warpPerspective(image, dst, M, dst.size(), INTER_LINEAR, BORDER_CONSTANT);
 		imshow("dst", dst);
+
+		//-----publish image to ROS-----
+
+	cv::Mat changed;
+	cv::cvtColor(image, changed, COLOR_BGR2RGB);
+	sensor_msgs::ImagePtr imgg = cv_bridge::CvImage(std_msgs::Header(), "rgb8", changed).toImageMsg();
+	clear_pub.publish(imgg);
+
+	//------------------------------
+
+
+	//-----publish image to ROS------
+
+	sensor_msgs::ImagePtr img_out = cv_bridge::CvImage(std_msgs::Header(), "mono8", OutputImage).toImageMsg();
+	mask_pub.publish(img_out);
+
+	//-------------------------------
 
 #endif
 
