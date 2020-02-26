@@ -29,28 +29,29 @@
 
 	#define turnscaling 40
 	#define turnoffset 10
-	#define TURN_MAGNITUDE 45
+	#define TURN_MAGNITUDE 35
+
 	
 
 //Upper and Lower values For BGR: Blue detection
  
-#define b_blower 123
-#define b_glower 54
-#define b_rlower 14
+#define b_blower 107
+#define b_glower 46
+#define b_rlower 6
 
-#define b_bupper 193
-#define b_gupper 144
-#define b_rupper 104
+#define b_bupper 177
+#define b_gupper 116
+#define b_rupper 76
 
 //Upper and Lower values For BGR: Yellow detection
  
-#define y_blower 134
-#define y_glower 165
-#define y_rlower 168
+#define y_blower 40
+#define y_glower 106
+#define y_rlower 117
 
-#define y_bupper 194
-#define y_gupper 225
-#define y_rupper 228
+#define y_bupper 130
+#define y_gupper 196
+#define y_rupper 187
 
 //vertices for perspective transformation
 #define topLeft 45,255
@@ -390,7 +391,7 @@ std::cout << "Offsetavg is: "<<offsetavgBlue<<std::endl;
 		//servo is 15 - 75
 		//servo 45 is forward
 		double ratio = (double) change / midPixel;
-		sendturn = 45 + ( (1 - ratio) * TURN_MAGNITUDE );
+		sendturn = 45 + ( (1 - ( ratio * abs(ratio) ) ) * TURN_MAGNITUDE );
 	
 #endif
 
