@@ -120,7 +120,7 @@ catkin_package(
 ###########
 
 ## Specify additional locations of header files
-## Your package locations should be listed before other locations
+## Your package locations should be listed befpublish(img_out);ore other locations
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}

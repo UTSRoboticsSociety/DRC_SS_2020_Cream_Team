@@ -1,12 +1,13 @@
 	#include "ros/ros.h"
 	#include "std_msgs/UInt16.h"
 	#include <image_transport/image_transport.h>
+	#include <sensor_msgs/image_encodings.h>
 	#include <cv_bridge/cv_bridge.h>
 	#include "std_msgs/String.h"
 	#include <sstream>
 
 	#include <opencv2/highgui.hpp>
-	#include <iostream>
+
 	#include <opencv2/core/core.hpp>
 	#include <opencv/cv.hpp>
 	#include <opencv2/imgproc/imgproc.hpp>
@@ -30,28 +31,28 @@
 
 	#define turnscaling 40
 	#define turnoffset 10
-	#define TURN_MAGNITUDE 30
+	#define TURN_MAGNITUDE 45
 	
 
-//Upper and Lower values For BGR: Blue detection
+//Upper and Lower values For BGR: Blue detection: bgr= 137,76,36
  
-#define b_blower 123
-#define b_glower 54
-#define b_rlower 14
+#define b_blower 107
+#define b_glower 46
+#define b_rlower 6
 
-#define b_bupper 183
-#define b_gupper 134
-#define b_rupper 94
+#define b_bupper 177
+#define b_gupper 116
+#define b_rupper 76
 
-//Upper and Lower values For BGR: Yellow detection
+//Upper and Lower values For BGR: Yellow detection: bgr:80,146,157
  
-#define y_blower 134
-#define y_glower 165
-#define y_rlower 168
+#define y_blower 40
+#define y_glower 106
+#define y_rlower 117
 
-#define y_bupper 214
-#define y_gupper 245
-#define y_rupper 248
+#define y_bupper 130
+#define y_gupper 196
+#define y_rupper 187
 
 //vertices for perspective transformation
 #define topLeft 45,255
@@ -65,7 +66,19 @@ void transform(Point2f*src_vertices, Point2f*dst_vertices, Mat& src, Mat &dst)
 	warpPerspective(src, dst, M, dst.size(), INTER_LINEAR, BORDER_CONSTANT);
 }
 
-
+void RosToOCV(const sensor_msgs::ImagePtr& im)
+{
+	cv_bridge::CvImagePtr cv_ptr;
+	try
+	{
+		cv_ptr = cv_bridge::toCvCopy(im, sensor_msgs::image_encodings::RGB8);
+	}
+	catch (cv_bridge::Exception&e)
+	{
+		ROS_ERROR("cv_bridge exception: %s", e.what());
+		return;
+	}
+}
 
 int main(int argc, char **argv)
 {
@@ -95,6 +108,8 @@ int main(int argc, char **argv)
 	
 
 	//ROS setup
+
+	
 	ros::init(argc, argv, "test");
 	
 	ros::NodeHandle nh;
@@ -102,8 +117,10 @@ int main(int argc, char **argv)
 	ros::Publisher servo_pub = nh.advertise<std_msgs::UInt16>("servo",500);
 	ros::Publisher chatter_pub = nh.advertise<std_msgs::String>("chatter",10);
 	ros::Publisher speed_pub = nh.advertise<std_msgs::UInt16>("motorspeed",500);
+	ros::Subscriber cam_sub = nh.subscribe("usb_cam/image_raw", 1, RosToOCV);
 
 	image_transport::ImageTransport it(nh);
+	
 	image_transport::Publisher clear_pub = it.advertise("clear_img",1);
 	image_transport::Publisher mask_pub = it.advertise("mask_img",1);
 
@@ -113,6 +130,9 @@ int main(int argc, char **argv)
 
 	std_msgs::UInt16 angle;
 	std_msgs::UInt16 speed;
+
+		std_msgs::String msg;
+		std::stringstream tt;
 
 	//Image Read
 	cv::Mat image;
@@ -139,7 +159,7 @@ int main(int argc, char **argv)
 		cap >> image;
 	#endif
 	#ifdef TEST_IMG
-		image = cv::imread("./src/beginner_tutorials/src/img278.jpg" , cv::IMREAD_COLOR); 
+		image = cv::imread("./src/DRC_SS_2020_Cream_Team/beginner_tutorials/src/img278.jpg" , cv::IMREAD_COLOR); 
 	#endif  
 
 	if(! image.data ) {
@@ -175,19 +195,13 @@ int main(int argc, char **argv)
 		//c = image.cols;
 #ifdef DISPLAY_IMG		
 		cv::imshow("window", image);
+cv::imwrite("./src/DRC_SS_2020_Cream_Team/beginner_tutorials/src/img2782.jpg",image);
 		cv::waitKey(1);
 		
 		Mat OutputImage;
 		Mat OutputImageBlue;
 		Mat OutputImageYellow;
 		inRange(image,Scalar(b_blower,b_glower,b_rlower),Scalar(b_bupper,b_gupper,b_rupper),OutputImageBlue);
-
-//-----publish image to ROS------
-
-	sensor_msgs::ImagePtr imgg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image).toImageMsg();
-	clear_pub.publish(imgg);
-
-//-------------------------------
 
 			
 
@@ -201,6 +215,25 @@ int main(int argc, char **argv)
 		//imshow("Yellow Detection", OutputImage);
 		//waitKey(9);
 		OutputImage = OutputImageBlue | OutputImageYellow;
+
+//-----publish image to ROS-----
+
+	cv::Mat changed;
+	cv::cvtColor(image, changed, COLOR_BGR2RGB);
+	sensor_msgs::ImagePtr imgg = cv_bridge::CvImage(std_msgs::Header(), "rgb8", changed).toImageMsg();
+	clear_pub.publish(imgg);
+
+//------------------------------
+
+
+//-----publish image to ROS------
+
+	sensor_msgs::ImagePtr img_out = cv_bridge::CvImage(std_msgs::Header(), "mono8", OutputImage).toImageMsg();
+	mask_pub.publish(img_out);
+
+//-------------------------------
+
+
 		//adding lines
 		for(int i = 0; i < c; i++)
 		{
@@ -212,7 +245,7 @@ int main(int argc, char **argv)
 		waitKey(9);
 		//Perspective Transform		
 		warpPerspective(image, dst, M, dst.size(), INTER_LINEAR, BORDER_CONSTANT);
-		imshow("dst", dst);
+		//imshow("dst", dst);
 
 #endif
 
@@ -279,14 +312,14 @@ int main(int argc, char **argv)
 					std::cout<<"no yellow found"<<std::endl;
 				#endif
 			}
-			else if(points.at(midpoint) > c/2){
+			/*else if(points.at(midpoint) > c/2){
 				midpoint = 0;
 				yellowMidPoints.push_back(midpoint);
 
 				#ifdef DEBUG
 					std::cout<<"   yellow found OVERSHOT"<<std::endl;
 				#endif
-			}
+			}*/
 			else{
 				yellowMidPoints.push_back(points.at(midpoint));
 				#ifdef DEBUG
@@ -334,14 +367,14 @@ int main(int argc, char **argv)
 					std::cout<<"no blue found"<<std::endl;
 				#endif
 			}
-			else if(points.at(midpoint) < c/2){
+			/*else if(points.at(midpoint) < c/2){
 				midpoint = c;
 				blueMidPoints.push_back(midpoint);
 
 				#ifdef DEBUG
 					std::cout<<"   blue found OVERSHOT"<<std::endl;
 				#endif
-			}
+			}*/
 			else{
 				blueMidPoints.push_back(points.at(midpoint));
 				#ifdef DEBUG
@@ -360,7 +393,6 @@ int main(int argc, char **argv)
 	
 		//end line for loop it here
 		}
-		//process the colours into an angle
 
 #ifdef testturning
 		int sendturn;
@@ -376,13 +408,14 @@ int main(int argc, char **argv)
 		}
 		offsetavgBlue = sum / blueMidPoints.size();
 //getting avg for yellow
+sum = 0;
 		for(std::vector<int>::iterator it = yellowMidPoints.begin(); it != yellowMidPoints.end(); ++it)
 		{
 			sum += *it;
 		}
 		offsetavgYellow = sum / yellowMidPoints.size();
 
-std::cout << "Offsetavg is: "<<offsetavgBlue<<std::endl;
+
 
 
 //old turning
@@ -393,22 +426,24 @@ std::cout << "Offsetavg is: "<<offsetavgBlue<<std::endl;
 		sendturn = turnscaling * ratioOffset + turnoffset;
 		std::cout<<"desired blue angle to send:"<<sendturn<<std::endl;
 */
+if(offsetavgYellow > -1){
 		int combineAvg = ( offsetavgBlue + offsetavgYellow ) / 2;
 		int change = combineAvg - midPixel;
 		//servo is 15 - 75
 		//servo 45 is forward
 		double ratio = (double) change / midPixel;
-		sendturn = 45 + ( ratio * TURN_MAGNITUDE );
-	
+		sendturn = 45 + (ratio * TURN_MAGNITUDE );
+}
+else{
+sendturn = 0;
+}
+std::cout << "Offsetavg is: "<<sendturn<<" "<<midPixel<<std::endl;
 #endif
 
 		//done processing clear midpoints
 		blueMidPoints.clear();
 		yellowMidPoints.clear();
 		// send to ROS
-
-		std_msgs::String msg;
-		std::stringstream tt;
 		int delay = 1;
 
 		//Setting servo angle and motor speed
@@ -427,7 +462,7 @@ std::cout << "Offsetavg is: "<<offsetavgBlue<<std::endl;
 		
 #endif
 
-		speed.data = 175;
+		speed.data = 190;
 		speed_pub.publish(speed);
 		//ros::Duration(delay).sleep();
 
@@ -435,6 +470,18 @@ std::cout << "Offsetavg is: "<<offsetavgBlue<<std::endl;
 		msg.data = tt.str();
 		ROS_INFO("%s",msg.data.c_str());
 		chatter_pub.publish(msg);
+		
+		//adding lines
+		/*for(int i = 0; i < c; i++)
+		{
+			OutputImage.at<Vec3b>(i,combineAvg) = 255;
+			OutputImage.at<Vec3b>(i,offsetavgBlue) = 255;
+			OutputImage.at<Vec3b>(i,offsetavgYellow) = 255;
+		}
+std::cout<<combineAvg<<offsetavgBlue<<offsetavgYellow<<std::endl;
+		imshow("Detection", OutputImage);
+		waitKey(9);*/
+
 
 
 //		ros::shutdown();

@@ -4,18 +4,15 @@
 
 <group ns="$(arg namespace)">
 
-        <arg name="CAMERA"              value="1"       />
+        <arg name="CAMERA"              value="0"       />
 	<arg name="SerialUSB"		value="1"	/>
 	<arg name="maintest"		value="1"	/>
-	<arg name="imgviewer"		value="1"	/>
+	<arg name="imgviewer"		value="0"	/>
 
 <!--
 #	<arg name="colourmask"		value="1"	/>
 #	colourmask and imgviewer are left for future use. 
 -->
-	<group if="$(arg CAMERA)">
-                <include file="$(find usb_cam)/launch/usb_cam-test.launch"/>
-        </group>
 
 	<group if="$(arg SerialUSB)">
 		<include file="$(find beginner_tutorials)/launch/serialusb.launch" />
@@ -32,6 +29,9 @@
 	<group if="$(arg imgviewer)">
 		<include file="$(find beginner_tutorials)/launch/imgviewer.launch"/>
 	</group>
+	<group if="$(arg CAMERA)">
+                <include file="$(find usb_cam)/launch/usb_cam-test.launch"/>
+        </group>
 
 </group>
 </launch>
